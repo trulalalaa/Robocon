@@ -1,87 +1,59 @@
-#include <iostream>
-#include <fstream>
-#include <cmath>
+#include <bits/stdc++.h>
+#include <fstream>  
 
 using namespace std;
 
-// Class Robot untuk konsep OOP
-class Robot {
-private:
-    string name;
-    double armLength1;
-    double armLength2;
+#define phi 3.14159265359
+#define rad (phi / 180.0)
 
+class RobotOmniwheel {
 public:
-    // Constructor untuk inisialisasi
-    Robot(string n, double a1, double a2) : name(n), armLength1(a1), armLength2(a2) {}
+    float matrix_invers[3][4];   
+    float laju_roda[4];   
+    float translasi[3];  
 
-    // Fungsi untuk menampilkan informasi robot
-    void showInfo() {
-        cout << "Robot: " << name << endl;
-        cout << "Arm Length 1: " << armLength1 << " units" << endl;
-        cout << "Arm Length 2: " << armLength2 << " units" << endl;
+    void KelajuanRoda(fstream &file) {
+        for (int i = 0; i < 4; i++) {
+            cout << "Input wheel " << i + 1 << " velocity (m/s): ";
+            cin >> laju_roda[i];
+            file << "Wheel " << i + 1 << " velocity: " << laju_roda[i] << " m/s\n";  
+        }
+        float sudut[] = {45.0, 135.0, 225.0, 315.0};
+        float radius = 1.0;  
+        for (int i = 0; i < 4; i++) {
+            matrix_invers[0][i] = sinf(sudut[i] * rad);  
+            matrix_invers[1][i] = cosf(sudut[i] * rad);  
+            matrix_invers[2][i] = radius;  
+        }
+        file << "\n";  
     }
-
-    // Fungsi untuk melakukan inverse kinematics (menghitung sudut)
-    void calculateIK(double x, double y) {
-        double d = (x*x + y*y - armLength1*armLength1 - armLength2*armLength2) / (2 * armLength1 * armLength2);
-        double theta2 = atan2(sqrt(1 - d*d), d); // Sudut kedua
-        double theta1 = atan2(y, x) - atan2(armLength2 * sin(theta2), armLength1 + armLength2 * cos(theta2)); // Sudut pertama
-
-        // Konversi ke derajat
-        theta1 = theta1 * 180 / M_PI;
-        theta2 = theta2 * 180 / M_PI;
-
-        cout << "Theta1: " << theta1 << " degrees\n";
-        cout << "Theta2: " << theta2 << " degrees\n";
-    }
-
-    // Fungsi untuk menyimpan informasi robot dan hasil inverse kinematics ke file
-    void saveToFile(double x, double y) {
-        ofstream myfile;
-        myfile.open("robotdata.txt");
-        myfile << "Robot Name: " << name << "\n";
-        myfile << "Arm Length 1: " << armLength1 << " units\n";
-        myfile << "Arm Length 2: " << armLength2 << " units\n";
-        myfile << "Target Position: (" << x << ", " << y << ")\n";
-
-        // Inverse Kinematics Calculation
-        double d = (x*x + y*y - armLength1*armLength1 - armLength2*armLength2) / (2 * armLength1 * armLength2);
-        double theta2 = atan2(sqrt(1 - d*d), d); // Sudut kedua
-        double theta1 = atan2(y, x) - atan2(armLength2 * sin(theta2), armLength1 + armLength2 * cos(theta2)); // Sudut pertama
-
-        // Konversi ke derajat
-        theta1 = theta1 * 180 / M_PI;
-        theta2 = theta2 * 180 / M_PI;
-
-        myfile << "Theta1: " << theta1 << " degrees\n";
-        myfile << "Theta2: " << theta2 << " degrees\n";
-
-        myfile.close();
-        cout << "Data saved to file 'robotdata.txt'." << endl;
+    void KelajuanTranslasi(fstream &file) {
+        for (int i = 0; i < 3; i++) {
+            translasi[i] = 0;
+            for (int j = 0; j < 4; j++) {
+                translasi[i] += matrix_invers[i][j] * laju_roda[j];
+            }
+        }
+        cout << "Translational velocity X: " << fixed << translasi[0] << " m/s\n";
+        cout << "Translational velocity Y: " << fixed << translasi[1] << " m/s\n";
+        cout << "Rotational velocity Theta: " << fixed << translasi[2] << " rad/s\n";
+        
+        file << "=========================\n";
+        file << "Translational velocity X: " << fixed << translasi[0] << " m/s\n";
+        file << "Translational velocity Y: " << fixed << translasi[1] << " m/s\n";
+        file << "Rotational velocity Theta: " << fixed << translasi[2] << " rad/s\n";
+        file << "=========================\n";  
+        file << "\n" << "Don Sir";
     }
 };
 
-// Fungsi utama (main)
 int main() {
-    // Membuat objek robot
-    Robot myRobot("RoboArm", 5.0, 3.0);
+    fstream file;
+    file.open("roda.txt", ios::out); 
 
-    // Menampilkan informasi robot
-    myRobot.showInfo();
+    RobotOmniwheel robot1;
+    robot1.KelajuanRoda(file);
+    robot1.KelajuanTranslasi(file);  
 
-    // Input target posisi untuk inverse kinematics
-    double targetX, targetY;
-    cout << "Enter target X position: ";
-    cin >> targetX;
-    cout << "Enter target Y position: ";
-    cin >> targetY;
-
-    // Melakukan perhitungan inverse kinematics
-    myRobot.calculateIK(targetX, targetY);
-
-    // Menyimpan hasil ke file
-    myRobot.saveToFile(targetX, targetY);
-
-    return 0;
+    file.close(); 
 }
