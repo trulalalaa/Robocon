@@ -12,7 +12,7 @@ public:
     float laju_roda[4];   
     float translasi[3];  
 
-    void KelajuanRoda(fstream &file) {
+    void KecepatanRoda(fstream &file) {
         for (int i = 0; i < 4; i++) {
             cout << "Input wheel " << i + 1 << " velocity (m/s): ";
             cin >> laju_roda[i];
@@ -27,7 +27,7 @@ public:
         }
         file << "\n";  
     }
-    void KelajuanTranslasi(fstream &file) {
+    void KecepatanTranslasi(fstream &file) {
         for (int i = 0; i < 3; i++) {
             translasi[i] = 0;
             for (int j = 0; j < 4; j++) {
@@ -52,8 +52,8 @@ int main() {
     file.open("roda.txt", ios::out); 
 
     RobotOmniwheel robot1;
-    robot1.KelajuanRoda(file);
-    robot1.KelajuanTranslasi(file);  
+    robot1.KecepatanRoda(file);
+    robot1.KecepatanTranslasi(file);  
 
     file.close(); 
 }
